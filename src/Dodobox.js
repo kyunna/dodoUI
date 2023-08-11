@@ -37,6 +37,8 @@ export default function Dodobox() {
     setProcessItems(0);
     setItemCount(0);
     setLoading(true);
+    
+    const apiURL = process.env.REACT_APP_ABUSE_API_URL;
 
     const lines = dodoboxValue.split('\n');
 
@@ -45,10 +47,10 @@ export default function Dodobox() {
     for (const line of lines) {
       if (line.trim() !== '') {
         try{
-          const response = await axios.post('/check/endpoint', {
+          const response = await axios.post(apiURL, {
             ip: line.trim()
           });
-          console.log('API Response for IP', line.trim(), ':', response.data);
+          // console.log('API Response for IP', line.trim(), ':', response.data);
           setResponseData((prevData) => [...prevData, response.data]);
           setProcessItems((prevItems) => prevItems + 1);
           /*
@@ -77,8 +79,8 @@ export default function Dodobox() {
 
   return (
     <CssVarsProvider theme={dodoTheme}>
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
+      <Grid container spacing={1} alignItems="center">
+        <Grid xs={12}>
           <Textarea
             placeholder="Type in here… "
             minRows={7}
@@ -87,37 +89,30 @@ export default function Dodobox() {
             onChange={dodoboxValueChange}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid xs={12} sm={6}>
           {loading ? (
-            <Button loading> Query </Button>
+            <Button loading loadingPosition="start"> {processItems} / {itemCount} </Button>
           ) : (
             <Button startDecorator={<FlutterDashIcon />} onClick={handleQueryButtonClick}> Query </Button>
           )}
         </Grid>
-        <Grid item xs={12} sm={6}>
-          {loading ? (
-            <p> {processItems} / {itemCount} </p>
-          ) : (
-            <p> Type in here…</p>
-          )}
-        </Grid>
-        <Grid item xs={12}>
+        <Grid xs={12}>
           {responseData && responseData.length > 0 && (
             <Table hoverRow stickyHeader>
               <thead>
                 <tr>
-                  <th>IP Address</th>
-                  <th>Abuse Score</th>
-                  <th>Country</th>
-                  <th>ISP</th>
-                  <th>Domain</th>
+                  <th style={{ width:'130px' }}>IP Address</th>
+                  <th style={{ width:'130px', textAlign:'center' }}>Abuse Score</th>
+                  <th style={{ width:'40%' }}>Country</th>
+                  <th style={{ width:'40%' }}>ISP</th>
+                  <th style={{ width:'40%' }}>Domain</th>
                 </tr>
               </thead>
               <tbody>
                 {responseData.map((response, index) => (
                   <tr key={index}>
                     <td>{response.data.ipAddress}</td>
-                    <td>{response.data.abuseConfidenceScore}</td>
+                    <td style={{textAlign:'center'}}>{response.data.abuseConfidenceScore}</td>
                     <td>{response.data.countryName}</td>
                     <td>{response.data.isp}</td>
                     <td>{response.data.domain}</td>
